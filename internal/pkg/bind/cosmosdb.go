@@ -116,6 +116,7 @@ func (s *CosmosDBService) assignRoleToCosmosDB(identityPrincipalID, cosmosDBName
 		"--role-definition-id", roleDefinitionID,
 		"--principal-id", identityPrincipalID,
 		"--scope", cosmosDBResourceID,
+		"--subscription", s.subscriptionID,
 	)
 
 	output, err := cmd.CombinedOutput()

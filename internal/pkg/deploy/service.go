@@ -62,24 +62,6 @@ func (s *Service) Deploy(ctx context.Context, spinAppYAMLPath, identityName stri
 	return nil
 }
 
-func (s *Service) getIdentityClientID(name, resourceGroup string) (string, error) {
-	cmd := exec.Command(
-		"az", "identity", "show",
-		"--name", name,
-		"--resource-group", resourceGroup,
-		"--subscription", s.subscriptionID,
-		"--query", "clientId",
-		"--output", "tsv",
-	)
-
-	output, err := cmd.CombinedOutput()
-	if err != nil {
-		return "", fmt.Errorf("failed to get identity client ID: %w\nOutput: %s", err, string(output))
-	}
-
-	return strings.TrimSpace(string(output)), nil
-}
-
 func (s *Service) getKubernetesCredentials(clusterName, resourceGroup string) error {
 	cmd := exec.Command(
 		"az", "aks", "get-credentials",
