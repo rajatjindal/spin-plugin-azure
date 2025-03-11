@@ -2,10 +2,30 @@
 
 A CLI tool for deploying and managing [Spin](https://github.com/fermyon/spin) applications on Azure Kubernetes Service (AKS) with workload identity.
 
-## Installation
+## Install from source
 
-```bash
-make build
+Manual installation is
+commonly used to test in-flight changes. For a user, it's better to install the plugin using Spin's plugin manager.
+
+Ensure the `pluginify` plugin is installed:
+
+```sh
+spin plugins update
+spin plugins install pluginify --yes
+```
+
+Fetch the plugin:
+
+```sh
+git clone git@github.com:mossaka/spin-plugin-azure.git
+cd spin-plugin-azure
+```
+
+Compile and install the plugin:
+
+```sh
+make
+make install
 ```
 
 ## Prerequisites
@@ -21,13 +41,13 @@ make build
 ### Login to Azure
 
 ```bash
-spin-azure login
+spin azure login
 ```
 
 ### Create a new AKS cluster
 
 ```bash
-spin-azure cluster create --name my-cluster --resource-group my-rg --location eastus
+spin azure cluster create --name my-cluster --resource-group my-rg --location eastus
 ```
 
 This creates a complete environment in one command:
@@ -39,31 +59,31 @@ This creates a complete environment in one command:
 You can specify a custom identity name:
 
 ```bash
-spin-azure cluster create --name my-cluster --resource-group my-rg --create-identity=my-custom-identity
+spin azure cluster create --name my-cluster --resource-group my-rg --create-identity=my-custom-identity
 ```
 
 ### Use an existing AKS cluster
 
 ```bash
-spin-azure cluster use --name existing-cluster --resource-group existing-rg
+spin azure cluster use --name existing-cluster --resource-group existing-rg
 ```
 
 When using an existing cluster, you can optionally install the Spin Operator:
 
 ```bash
-spin-azure cluster use --name existing-cluster --resource-group existing-rg --install-spin-operator
+spin azure cluster use --name existing-cluster --resource-group existing-rg --install-spin-operator
 ```
 
 And you can create an identity at the same time:
 
 ```bash
-spin-azure cluster use --name existing-cluster --resource-group existing-rg --create-identity=my-custom-identity
+spin azure cluster use --name existing-cluster --resource-group existing-rg --create-identity=my-custom-identity
 ```
 
 ### Check workload identity status
 
 ```bash
-spin-azure cluster check-identity
+spin azure cluster check-identity
 ```
 
 This checks if workload identity is enabled on the current cluster, and enables it if not.
@@ -73,13 +93,13 @@ This checks if workload identity is enabled on the current cluster, and enables 
 You can install the Spin Operator on an existing cluster:
 
 ```bash
-spin-azure cluster install-spin-operator
+spin azure cluster install-spin-operator
 ```
 
 ### Assign Role to Azure CosmosDB
 
 ```bash
-spin-azure assign-role cosmosdb --name my-cosmos --resource-group my-rg
+spin azure assign-role cosmosdb --name my-cosmos --resource-group my-rg
 ```
 
 This assigns the necessary RBAC roles to your workload identity, allowing it to access the specified CosmosDB instance.
@@ -89,7 +109,7 @@ This assigns the necessary RBAC roles to your workload identity, allowing it to 
 You can deploy a Spin application to your cluster with a simple command:
 
 ```bash
-spin-azure deploy --from path/to/spinapp.yaml
+spin azure deploy --from path/to/spinapp.yaml
 ```
 
 This will deploy the application using the default "workload-identity" that was created with the cluster.
@@ -97,7 +117,7 @@ This will deploy the application using the default "workload-identity" that was 
 If you want to use a custom identity, you can specify it with the --identity flag:
 
 ```bash
-spin-azure deploy --from path/to/spinapp.yaml --identity my-custom-identity
+spin azure deploy --from path/to/spinapp.yaml --identity my-custom-identity
 ```
 
 > warning: since SpinApp CRD does not support serviceAccountName yet, you need to edit the deployment YAML file to set the `serviceAccountName` field to `workload-identity`.
@@ -129,17 +149,17 @@ spin-azure deploy --from path/to/spinapp.yaml --identity my-custom-identity
 
 ```mermaid
 flowchart LR
-    subgraph "Local Development"
+    subgraph LD ["Local Development"]
         A[Spin App] --> |"spin build"| B[Wasm Components]
         B --> |"spin registry push"| C[Container Registry]
     end
     
-    subgraph "Kubernetes Deployment"
+    subgraph KD ["Kubernetes Deployment"]
         C --> |"spin kube scaffold"| D[SpinApp YAML]
         D --> |"spin azure deploy"| F[AKS Cluster]
     end
     
-    subgraph "Azure Resources"
+    subgraph AR ["Azure Resources"]
         G[Azure Identity] ---|"has"| H[Service Account]
         H ---|"used by"| F
         I[Azure CosmosDB] --> |"spin azure assign-role"| G
