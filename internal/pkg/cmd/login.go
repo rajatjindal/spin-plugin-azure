@@ -119,7 +119,3 @@ func NewLogoutCommand() *cobra.Command {
 
 	return cmd
 }
-
-func azureTokenScope() string {
-	return "https://management.azure.com/.default"
-}
