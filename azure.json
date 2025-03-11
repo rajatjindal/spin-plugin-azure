@@ -1,0 +1,16 @@
+{
+  "name": "azure",
+  "description": "Commands for deploying Spin applications to Azure Kubernetes Service (AKS) with workload identity.",
+  "homepage": "https://github.com/mossaka/spin-plugin-azure",
+  "version": "0.1.0",
+  "spinCompatibility": ">=2.3.1",
+  "license": "Apache-2.0",
+  "packages": [
+    {
+      "os": "linux",
+      "arch": "amd64",
+      "url": "file:///home/mossaka/developer/spinframework/spin-plugin-azure/azure-0.1.0-linux-x86_64.tar.gz",
+      "sha256": "a274462f681744c21cc616b1050e5cd4d012100b9fcccedd6454df47514b0d9f"
+    }
+  ]
+}
