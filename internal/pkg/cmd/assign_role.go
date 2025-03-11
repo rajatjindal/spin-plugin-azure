@@ -9,11 +9,11 @@ import (
 	"github.com/spinframework/spin-plugin-azure/internal/pkg/config"
 )
 
-func NewBindCommand() *cobra.Command {
+func NewAssignRoleCommand() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "bind",
-		Short: "Bind Spin applications to Azure services",
-		Long:  `Bind Spin applications to Azure services like CosmosDB.`,
+		Use:   "assign-role",
+		Short: "Assign Azure RBAC roles to managed identities",
+		Long:  `Assign Azure RBAC roles to managed identities for accessing Azure services like CosmosDB.`,
 	}
 
 	cmd.AddCommand(newBindCosmosDBCommand())
@@ -26,8 +26,8 @@ func newBindCosmosDBCommand() *cobra.Command {
 
 	cmd := &cobra.Command{
 		Use:   "cosmosdb",
-		Short: "Bind to an Azure CosmosDB instance",
-		Long:  `Bind a Spin application to an Azure CosmosDB instance.`,
+		Short: "Assign Azure roles for CosmosDB access",
+		Long:  `Assign the necessary Azure RBAC roles to a managed identity for accessing an Azure CosmosDB instance.`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			credential, err := config.GetAzureCredential()
 			if err != nil {
@@ -45,19 +45,19 @@ func newBindCosmosDBCommand() *cobra.Command {
 
 			cosmosDBService := bind.NewCosmosDBService(credential, cfg.SubscriptionID)
 
-			fmt.Printf("Binding to CosmosDB '%s' in resource group '%s'...\n", name, resourceGroup)
+			fmt.Printf("Assigning CosmosDB Data Contributor role to identity '%s' for CosmosDB account '%s'...\n", cfg.WorkloadIdentity, name)
 			ctx := context.Background()
 			if err := cosmosDBService.BindCosmosDB(ctx, name, resourceGroup); err != nil {
-				return fmt.Errorf("failed to bind to CosmosDB: %w", err)
+				return fmt.Errorf("failed to assign role to CosmosDB: %w", err)
 			}
 
-			fmt.Printf("Successfully bound to CosmosDB '%s'\n", name)
+			fmt.Printf("Successfully assigned roles to CosmosDB '%s'\n", name)
 			return nil
 		},
 	}
 
-	cmd.Flags().StringVar(&name, "name", "", "Name of the CosmosDB instance (required)")
-	cmd.Flags().StringVar(&resourceGroup, "resource-group", "", "Resource group of the CosmosDB instance (required)")
+	cmd.Flags().StringVar(&name, "name", "", "Name of the CosmosDB account (required)")
+	cmd.Flags().StringVar(&resourceGroup, "resource-group", "", "Resource group of the CosmosDB account (required)")
 	cmd.MarkFlagsRequiredTogether("name", "resource-group")
 
 	return cmd

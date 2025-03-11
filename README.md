@@ -76,13 +76,13 @@ You can install the Spin Operator on an existing cluster:
 spin-azure cluster install-spin-operator
 ```
 
-### Bind to Azure CosmosDB
+### Assign Role to Azure CosmosDB
 
 ```bash
-spin-azure bind cosmosdb --name my-cosmos --resource-group my-rg
+spin-azure assign-role cosmosdb --name my-cosmos --resource-group my-rg
 ```
 
-This grants your workload identity access to the specified CosmosDB instance.
+This assigns the necessary RBAC roles to your workload identity, allowing it to access the specified CosmosDB instance.
 
 ### Deploy a Spin application
 

@@ -16,7 +16,7 @@ and deploy Spin apps to them.`,
 	cmd.AddCommand(NewLoginCommand())
 	cmd.AddCommand(NewLogoutCommand())
 	cmd.AddCommand(NewClusterCommand())
-	cmd.AddCommand(NewBindCommand())
+	cmd.AddCommand(NewAssignRoleCommand())
 	cmd.AddCommand(NewDeployCommand())
 
 	return cmd
