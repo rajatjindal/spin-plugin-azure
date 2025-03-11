@@ -1,0 +1,9 @@
+# Binaries for programs and plugins
+/bin
+
+# output from `spin pluginify --install`
+*.tar.gz
+kube.json
+
+/infra
+/sample
