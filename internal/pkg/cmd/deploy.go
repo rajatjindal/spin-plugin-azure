@@ -56,7 +56,9 @@ func NewDeployCommand() *cobra.Command {
 
 	cmd.Flags().StringVar(&from, "from", "", "Path to the SpinApp YAML file (required)")
 	cmd.Flags().StringVar(&identity, "identity", "workload-identity", "Name of the workload identity to use (default: workload-identity)")
-	cmd.MarkFlagRequired("from")
+	if err := cmd.MarkFlagRequired("from"); err != nil {
+		panic(fmt.Sprintf("failed to mark flag 'from' as required: %v", err))
+	}
 
 	return cmd
 }
