@@ -26,20 +26,25 @@ func NewService(credential azcore.TokenCredential, subscriptionID string) (*Serv
 }
 
 // CreateCluster creates a new AKS cluster with workload identity enabled
-func (s *Service) CreateCluster(ctx context.Context, resourceGroup, clusterName, location string) error {
-	cmd := exec.Command(
-		"az", "aks", "create",
+func (s *Service) CreateCluster(ctx context.Context, resourceGroup, clusterName, location string, nodeCount int, nodeVMSize string, additionalArgs ...string) error {
+	args := []string{
+		"aks", "create",
 		"--resource-group", resourceGroup,
 		"--name", clusterName,
 		"--location", location,
 		"--enable-oidc-issuer",
 		"--enable-workload-identity",
 		"--generate-ssh-keys",
-		"--node-count", "1",
-		"--node-vm-size", "Standard_DS2_v2",
+		"--node-count", fmt.Sprintf("%d", nodeCount),
+		"--node-vm-size", nodeVMSize,
 		"--dns-name-prefix", fmt.Sprintf("%s-wid", clusterName),
 		"--subscription", s.subscriptionID,
-	)
+	}
+
+	args = append(args, additionalArgs...)
+
+	fmt.Println("Creating AKS cluster with args:", strings.Join(args, " "))
+	cmd := exec.Command("az", args...)
 
 	output, err := cmd.CombinedOutput()
 	if err != nil {

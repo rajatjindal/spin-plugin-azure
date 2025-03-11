@@ -3,6 +3,8 @@ package cmd
 import (
 	"context"
 	"fmt"
+	"strconv"
+	"strings"
 
 	"github.com/spf13/cobra"
 	"github.com/spinframework/spin-plugin-azure/internal/pkg/aks"
@@ -25,14 +27,78 @@ func NewClusterCommand() *cobra.Command {
 }
 
 func newClusterCreateCommand() *cobra.Command {
-	var name, resourceGroup, location, createIdentity string
+	var name, resourceGroup, location, createIdentity, nodeVMSize string
 	var skipIdentityCreation bool
+	var nodeCount int
+	var additionalArgs []string
 
 	cmd := &cobra.Command{
-		Use:   "create",
-		Short: "Create a new AKS cluster with workload identity enabled",
-		Long:  `Create a new Azure Kubernetes Service (AKS) cluster with workload identity enabled, Spin Operator installed, and a managed identity with service account configured.`,
+		Use:                "create",
+		Short:              "Create a new AKS cluster with workload identity enabled",
+		Long:               `Create a new Azure Kubernetes Service (AKS) cluster with workload identity enabled, Spin Operator installed, and a managed identity with service account configured.`,
+		DisableFlagParsing: false,
+		PreRunE: func(cmd *cobra.Command, args []string) error {
+			cmd.DisableFlagParsing = true
+			return nil
+		},
 		RunE: func(cmd *cobra.Command, args []string) error {
+			customArgs := make(map[string]string)
+
+			for i := 0; i < len(args); i++ {
+				arg := args[i]
+
+				if arg == "--name" || arg == "-n" {
+					if i+1 < len(args) && !strings.HasPrefix(args[i+1], "--") {
+						name = args[i+1]
+						i++
+					}
+				} else if arg == "--resource-group" || arg == "-g" {
+					if i+1 < len(args) && !strings.HasPrefix(args[i+1], "--") {
+						resourceGroup = args[i+1]
+						i++
+					}
+				} else if arg == "--location" || arg == "-l" {
+					if i+1 < len(args) && !strings.HasPrefix(args[i+1], "--") {
+						location = args[i+1]
+						i++
+					}
+				} else if arg == "--create-identity" {
+					if i+1 < len(args) && !strings.HasPrefix(args[i+1], "--") {
+						createIdentity = args[i+1]
+						i++
+					}
+				} else if arg == "--skip-identity-creation" {
+					skipIdentityCreation = true
+				} else if arg == "--node-count" {
+					if i+1 < len(args) && !strings.HasPrefix(args[i+1], "--") {
+						count, err := strconv.Atoi(args[i+1])
+						if err == nil {
+							nodeCount = count
+						}
+						i++
+					}
+				} else if arg == "--node-vm-size" {
+					if i+1 < len(args) && !strings.HasPrefix(args[i+1], "--") {
+						nodeVMSize = args[i+1]
+						i++
+					}
+				} else if strings.HasPrefix(arg, "--") {
+					if i+1 < len(args) && !strings.HasPrefix(args[i+1], "--") {
+						customArgs[arg] = args[i+1]
+						i++
+					} else {
+						customArgs[arg] = ""
+					}
+				}
+			}
+
+			if name == "" {
+				return fmt.Errorf("--name is required")
+			}
+			if resourceGroup == "" {
+				return fmt.Errorf("--resource-group is required")
+			}
+
 			credential, err := config.GetAzureCredential()
 			if err != nil {
 				return fmt.Errorf("failed to get Azure credential: %w", err)
@@ -56,9 +122,30 @@ func newClusterCreateCommand() *cobra.Command {
 				location = "eastus"
 			}
 
-			fmt.Printf("Creating AKS cluster '%s' in resource group '%s'...\n", name, resourceGroup)
+			if nodeCount <= 0 {
+				nodeCount = 1
+			}
+
+			if nodeVMSize == "" {
+				nodeVMSize = "Standard_DS2_v2"
+			}
+
+			for k, v := range customArgs {
+				if v == "" {
+					additionalArgs = append(additionalArgs, k)
+				} else {
+					additionalArgs = append(additionalArgs, k, v)
+				}
+			}
+
+			fmt.Printf("Creating AKS cluster '%s' in resource group '%s' with %d nodes (VM size: %s)...\n",
+				name, resourceGroup, nodeCount, nodeVMSize)
+			if len(additionalArgs) > 0 {
+				fmt.Println("Additional arguments passed to az aks create:", additionalArgs)
+			}
+
 			ctx := context.Background()
-			if err := aksService.CreateCluster(ctx, resourceGroup, name, location); err != nil {
+			if err := aksService.CreateCluster(ctx, resourceGroup, name, location, nodeCount, nodeVMSize, additionalArgs...); err != nil {
 				return fmt.Errorf("failed to create AKS cluster: %w", err)
 			}
 
@@ -98,7 +185,15 @@ func newClusterCreateCommand() *cobra.Command {
 	cmd.Flags().StringVar(&location, "location", "", "Azure region for the AKS cluster (default: eastus)")
 	cmd.Flags().StringVar(&createIdentity, "create-identity", "workload-identity", "Name of the identity to create (default: workload-identity)")
 	cmd.Flags().BoolVar(&skipIdentityCreation, "skip-identity-creation", false, "Skip creation of managed identity and service account")
-	cmd.MarkFlagsRequiredTogether("name", "resource-group")
+	cmd.Flags().IntVar(&nodeCount, "node-count", 1, "Number of nodes in the AKS cluster (default: 1)")
+	cmd.Flags().StringVar(&nodeVMSize, "node-vm-size", "Standard_DS2_v2", "VM size for the AKS cluster nodes (default: Standard_DS2_v2)")
+
+	cmd.Long += `
+
+  Any additional arguments provided will be passed directly to 'az aks create'.
+  For example, you can specify '--kubernetes-version 1.23.5' to create a cluster with a specific Kubernetes version.
+  
+  See 'az aks create --help' for all available options.`
 
 	return cmd
 }
