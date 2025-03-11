@@ -62,6 +62,14 @@ You can specify a custom identity name:
 spin azure cluster create --name my-cluster --resource-group my-rg --create-identity=my-custom-identity
 ```
 
+You can also specify any additional `az aks create` arguments, which will be passed directly to the underlying Azure CLI:
+
+```bash
+spin azure cluster create --name my-cluster --resource-group my-rg -- --kubernetes-version 1.24.9 --node-count 3 --node-vm-size Standard_D4s_v3 --zones 1 2 3
+```
+
+See `az aks create --help` for the full list of supported arguments.
+
 ### Use an existing AKS cluster
 
 ```bash
