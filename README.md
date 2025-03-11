@@ -102,3 +102,47 @@ spin-azure deploy --from path/to/spinapp.yaml --identity my-custom-identity
 
 > warning: since SpinApp CRD does not support serviceAccountName yet, you need to edit the deployment YAML file to set the `serviceAccountName` field to `workload-identity`.
 
+## Workflow Explanation:
+
+
+1. **`spin registry push`**:
+   - build the Spin application locally and push it to a container registry (e.g. Azure Container Registry)
+
+
+1. **`spin kube scaffold`**:
+   - Use `spin kube scaffold --from <image>` to generate a SpinApp Custom Resource Definition (CRD) YAML file
+   - This YAML specifies how to deploy your Spin app in Kubernetes using the Spin Operator
+
+1. **`spin azure cluster create / use`**:
+   - Create a new AKS cluster with workload identity enabled
+   - Install the Spin Operator
+   - Create an Azure managed identity
+   - Configure a Kubernetes service account for the identity
+
+1. **`spin azure assign-role`**:
+   - Assign necessary Azure service roles to the workload identity
+
+1. **`spin azure deploy`**:
+   - Use `spin azure deploy --from <path to yaml>` to deploy this YAML to your AKS cluster
+
+## Mermaid Diagram
+
+```mermaid
+flowchart LR
+    subgraph "Local Development"
+        A[Spin App] --> |"spin build"| B[Wasm Components]
+        B --> |"spin registry push"| C[Container Registry]
+    end
+    
+    subgraph "Kubernetes Deployment"
+        C --> |"spin kube scaffold"| D[SpinApp YAML]
+        D --> |"spin azure deploy"| F[AKS Cluster]
+    end
+    
+    subgraph "Azure Resources"
+        G[Azure Identity] ---|"has"| H[Service Account]
+        H ---|"used by"| F
+        I[Azure CosmosDB] --> |"spin azure assign-role"| G
+    end
+```
+
