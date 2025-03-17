@@ -43,9 +43,16 @@ func newBindCosmosDBCommand() *cobra.Command {
 				return fmt.Errorf("subscription ID not set, please set it using Azure CLI or environment variables")
 			}
 
+			if resourceGroup == "" {
+				if cfg.ResourceGroup == "" {
+					return fmt.Errorf("resource group not set, please set it using --resource-group")
+				}
+				resourceGroup = cfg.ResourceGroup
+			}
+
 			cosmosDBService := bind.NewCosmosDBService(credential, cfg.SubscriptionID)
 
-			fmt.Printf("Assigning CosmosDB Data Contributor role to identity '%s' for CosmosDB account '%s'...\n", cfg.WorkloadIdentity, name)
+			fmt.Printf("Assigning CosmosDB Data Contributor role to identity '%s' for CosmosDB account '%s' in resource group '%s'...\n", cfg.WorkloadIdentity, name, resourceGroup)
 			ctx := context.Background()
 			if err := cosmosDBService.BindCosmosDB(ctx, name, resourceGroup); err != nil {
 				return fmt.Errorf("failed to assign role to CosmosDB: %w", err)
@@ -57,8 +64,8 @@ func newBindCosmosDBCommand() *cobra.Command {
 	}
 
 	cmd.Flags().StringVar(&name, "name", "", "Name of the CosmosDB account (required)")
-	cmd.Flags().StringVar(&resourceGroup, "resource-group", "", "Resource group of the CosmosDB account (required)")
-	cmd.MarkFlagsRequiredTogether("name", "resource-group")
+	cmd.Flags().StringVar(&resourceGroup, "resource-group", "", "Resource group of the CosmosDB account")
+	cmd.MarkFlagsRequiredTogether("name")
 
 	return cmd
 }

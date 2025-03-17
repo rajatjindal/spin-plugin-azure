@@ -29,7 +29,7 @@ func (s *CosmosDBService) BindCosmosDB(ctx context.Context, name, resourceGroup 
 	}
 
 	if cfg.WorkloadIdentity == "" {
-		return fmt.Errorf("no workload identity configured, use 'spin-azure identity create' first")
+		return fmt.Errorf("no workload identity configured, use 'spin-azure cluster' first")
 	}
 
 	if err := s.validateCosmosDBAccount(name, resourceGroup); err != nil {

@@ -173,6 +173,11 @@ func (s *Service) DeploySpinOperator(ctx context.Context) error {
 		return fmt.Errorf("no cluster is currently selected, use 'spin-azure cluster use' first")
 	}
 
+	if cfg.SpinOperatorDeployed {
+		fmt.Println("Spin Operator is already deployed, skipping")
+		return nil
+	}
+
 	fmt.Println("Setting up kubectl with cluster credentials...")
 	getCredsCmd := exec.Command(
 		"az", "aks", "get-credentials",
@@ -322,6 +327,12 @@ func (s *Service) DeploySpinOperator(ctx context.Context) error {
 		return fmt.Errorf("failed to apply shim executor configuration: %w\nOutput: %s", err, string(output))
 	}
 
+	cfg.SpinOperatorDeployed = true
+
+	if err := config.SaveConfig(cfg); err != nil {
+		return fmt.Errorf("failed to save config: %w", err)
+	}
+
 	fmt.Println("Spin Operator has been successfully deployed to the cluster!")
 	return nil
 }
@@ -459,6 +470,11 @@ func (s *Service) CreateIdentity(ctx context.Context, identityName string, resou
 		if err := s.createFederatedCredential(identityName, clientID, clusterName, resourceGroup); err != nil {
 			return fmt.Errorf("failed to create federated identity credential: %w", err)
 		}
+	}
+
+	cfg.WorkloadIdentity = identityName
+	if err := config.SaveConfig(cfg); err != nil {
+		return fmt.Errorf("failed to save identity name to config: %w", err)
 	}
 
 	fmt.Printf("Created managed identity '%s' with client ID '%s'\n", identityName, clientID)

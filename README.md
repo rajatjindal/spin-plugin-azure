@@ -30,7 +30,7 @@ make install
 
 ## Prerequisites
 
-- [Azure CLI](https://docs.microsoft.com/en-us/cli/azure/install-azure-cli) (`az` command)
+- [Azure CLI](https://docs.microsoft.com/en-us/cli/azure/install-azure-cli) (`az` command version 2.70.0 or higher)
 - [kubectl](https://kubernetes.io/docs/tasks/tools/)
 - [Spin CLI](https://github.com/fermyon/spin)
 - [Helm](https://helm.sh/docs/intro/install/) - package manager for Kubernetes
