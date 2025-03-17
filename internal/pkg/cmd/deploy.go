@@ -36,9 +36,8 @@ func NewDeployCommand() *cobra.Command {
 				return fmt.Errorf("--from flag is required, please specify the path to the SpinApp YAML file")
 			}
 
-			if identity == "" {
-				identity = "workload-identity"
-				fmt.Println("No identity specified, using default 'workload-identity'")
+			if cfg.WorkloadIdentity == "" {
+				return fmt.Errorf("no workload identity configured, please set it using the 'cluster' command")
 			}
 
 			deployService := deploy.NewService(credential, cfg.SubscriptionID)
@@ -55,7 +54,6 @@ func NewDeployCommand() *cobra.Command {
 	}
 
 	cmd.Flags().StringVar(&from, "from", "", "Path to the SpinApp YAML file (required)")
-	cmd.Flags().StringVar(&identity, "identity", "workload-identity", "Name of the workload identity to use (default: workload-identity)")
 	if err := cmd.MarkFlagRequired("from"); err != nil {
 		panic(fmt.Sprintf("failed to mark flag 'from' as required: %v", err))
 	}

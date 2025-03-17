@@ -182,11 +182,11 @@ func newClusterCreateCommand() *cobra.Command {
 
 	cmd.Flags().StringVar(&name, "name", "", "Name of the AKS cluster (required)")
 	cmd.Flags().StringVar(&resourceGroup, "resource-group", "", "Resource group for the AKS cluster (required)")
-	cmd.Flags().StringVar(&location, "location", "", "Azure region for the AKS cluster (default: eastus)")
-	cmd.Flags().StringVar(&createIdentity, "create-identity", "workload-identity", "Name of the identity to create (default: workload-identity)")
+	cmd.Flags().StringVar(&location, "location", "eastus", "Azure region for the AKS cluster")
+	cmd.Flags().StringVar(&createIdentity, "create-identity", "workload-identity", "Name of the identity to create")
 	cmd.Flags().BoolVar(&skipIdentityCreation, "skip-identity-creation", false, "Skip creation of managed identity and service account")
-	cmd.Flags().IntVar(&nodeCount, "node-count", 1, "Number of nodes in the AKS cluster (default: 1)")
-	cmd.Flags().StringVar(&nodeVMSize, "node-vm-size", "Standard_DS2_v2", "VM size for the AKS cluster nodes (default: Standard_DS2_v2)")
+	cmd.Flags().IntVar(&nodeCount, "node-count", 1, "Number of nodes in the AKS cluster")
+	cmd.Flags().StringVar(&nodeVMSize, "node-vm-size", "Standard_DS2_v2", "VM size for the AKS cluster nodes")
 
 	cmd.Long += `
 
@@ -219,6 +219,13 @@ func newClusterUseCommand() *cobra.Command {
 
 			if cfg.SubscriptionID == "" {
 				return fmt.Errorf("subscription ID not set, please set it using Azure CLI or environment variables")
+			}
+
+			if resourceGroup == "" {
+				if cfg.ResourceGroup == "" {
+					return fmt.Errorf("resource group not set, please set it using --resource-group")
+				}
+				resourceGroup = cfg.ResourceGroup
 			}
 
 			aksService, err := aks.NewService(credential, cfg.SubscriptionID)
@@ -261,12 +268,11 @@ func newClusterUseCommand() *cobra.Command {
 	}
 
 	cmd.Flags().StringVar(&name, "name", "", "Name of the existing AKS cluster (required)")
-	cmd.Flags().StringVar(&resourceGroup, "resource-group", "", "Resource group of the existing AKS cluster (required)")
+	cmd.Flags().StringVar(&resourceGroup, "resource-group", "", "Resource group of the existing AKS cluster")
 	cmd.Flags().BoolVar(&installSpinOperator, "install-spin-operator", false, "Install Spin Operator on the cluster after selection")
 	cmd.Flags().StringVar(&createIdentity, "create-identity", "", "Name of the identity to create")
 	cmd.Flags().BoolVar(&skipIdentityCreation, "skip-identity-creation", false, "Skip creation of managed identity and service account")
-	cmd.MarkFlagsRequiredTogether("name", "resource-group")
-
+	cmd.MarkFlagsRequiredTogether("name")
 	return cmd
 }
 

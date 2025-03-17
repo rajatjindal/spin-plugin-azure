@@ -10,13 +10,13 @@ import (
 )
 
 type Config struct {
-	SubscriptionID    string `json:"subscriptionId"`
-	TenantID          string `json:"tenantId"`
-	ResourceGroup     string `json:"resourceGroup"`
-	ClusterName       string `json:"clusterName"`
-	Location          string `json:"location"`
-	WorkloadIdentity  string `json:"workloadIdentity"`
-	WorkspaceLocation string `json:"workspaceLocation"`
+	SubscriptionID       string `json:"subscriptionId"`
+	TenantID             string `json:"tenantId"`
+	ResourceGroup        string `json:"resourceGroup"`
+	ClusterName          string `json:"clusterName"`
+	Location             string `json:"location"`
+	SpinOperatorDeployed bool   `json:"spinOperatorDeployed"`
+	WorkloadIdentity     string `json:"workloadIdentity"`
 }
 
 func GetConfigDir() (string, error) {
