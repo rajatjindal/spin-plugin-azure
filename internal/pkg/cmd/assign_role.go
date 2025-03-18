@@ -22,7 +22,7 @@ func NewAssignRoleCommand() *cobra.Command {
 }
 
 func newBindCosmosDBCommand() *cobra.Command {
-	var name, resourceGroup, identityName string
+	var name, resourceGroup, identityName, identityResourceGroup string
 
 	cmd := &cobra.Command{
 		Use:   "cosmosdb",
@@ -44,24 +44,33 @@ func newBindCosmosDBCommand() *cobra.Command {
 			}
 
 			if resourceGroup == "" {
-				if cfg.ResourceGroup == "" {
-					return fmt.Errorf("resource group not set, please set it using --resource-group")
-				}
+
 				resourceGroup = cfg.ResourceGroup
 			}
 
+			if resourceGroup == "" {
+				return fmt.Errorf("resource group for CosmosDB not set, please set it using --resource-group")
+			}
+
+			if identityResourceGroup == "" {
+				identityResourceGroup = resourceGroup
+			}
+
 			if identityName == "" {
-				if cfg.IdentityName == "" {
-					return fmt.Errorf("identity name not set, please set it using --identity")
-				}
 				identityName = cfg.IdentityName
+			}
+
+			if identityName == "" {
+				return fmt.Errorf("identity name not set, please set it using --identity")
 			}
 
 			cosmosDBService := bind.NewCosmosDBService(credential, cfg.SubscriptionID)
 
-			fmt.Printf("Assigning CosmosDB Data Contributor role to identity '%s' for CosmosDB account '%s' in resource group '%s'...\n", identityName, name, resourceGroup)
+			fmt.Printf("Assigning CosmosDB Data Contributor role to identity '%s' (in resource group '%s') for CosmosDB account '%s' (in resource group '%s')...\n",
+				identityName, identityResourceGroup, name, resourceGroup)
+
 			ctx := context.Background()
-			if err := cosmosDBService.BindCosmosDB(ctx, name, resourceGroup, identityName); err != nil {
+			if err := cosmosDBService.BindCosmosDB(ctx, name, resourceGroup, identityName, identityResourceGroup); err != nil {
 				return fmt.Errorf("failed to assign role to CosmosDB: %w", err)
 			}
 
@@ -73,6 +82,7 @@ func newBindCosmosDBCommand() *cobra.Command {
 	cmd.Flags().StringVar(&name, "name", "", "Name of the CosmosDB account (required)")
 	cmd.Flags().StringVar(&resourceGroup, "resource-group", "", "Resource group of the CosmosDB account")
 	cmd.Flags().StringVar(&identityName, "identity", "", "Name of the identity to assign roles to")
+	cmd.Flags().StringVar(&identityResourceGroup, "identity-resource-group", "", "Resource group of the managed identity (defaults to the CosmosDB resource group if not specified)")
 	cmd.MarkFlagRequired("name")
 
 	return cmd

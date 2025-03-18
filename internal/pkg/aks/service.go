@@ -76,6 +76,8 @@ func (s *Service) GetCluster(ctx context.Context, resourceGroup, clusterName str
 		"--subscription", s.subscriptionID,
 	)
 
+	fmt.Println("Executing command:", strings.Join(cmd.Args, " "))
+
 	output, err := cmd.CombinedOutput()
 	if err != nil {
 		return fmt.Errorf("failed to get AKS cluster: %w\nOutput: %s", err, string(output))
@@ -125,6 +127,8 @@ func (s *Service) CheckWorkloadIdentity(ctx context.Context) (bool, error) {
 		"--output", "tsv",
 	)
 
+	fmt.Println("Executing command:", strings.Join(cmd.Args, " "))
+
 	output, err := cmd.CombinedOutput()
 	if err != nil {
 		return false, fmt.Errorf("failed to check workload identity: %w\nOutput: %s", err, string(output))
@@ -153,6 +157,8 @@ func (s *Service) EnableWorkloadIdentity(ctx context.Context) error {
 		"--enable-oidc-issuer",
 		"--enable-workload-identity",
 	)
+
+	fmt.Println("Executing command:", strings.Join(cmd.Args, " "))
 
 	output, err := cmd.CombinedOutput()
 	if err != nil {
@@ -186,6 +192,8 @@ func (s *Service) DeploySpinOperator(ctx context.Context) error {
 		"--subscription", s.subscriptionID,
 		"--overwrite-existing",
 	)
+
+	fmt.Println("Executing command:", strings.Join(getCredsCmd.Args, " "))
 
 	output, err := getCredsCmd.CombinedOutput()
 	if err != nil {
@@ -357,6 +365,8 @@ func (s *Service) CreateServiceAccount(ctx context.Context, identityName string)
 		"--overwrite-existing",
 	)
 
+	fmt.Println("Executing command:", strings.Join(getCredsCmd.Args, " "))
+
 	output, err := getCredsCmd.CombinedOutput()
 	if err != nil {
 		return fmt.Errorf("failed to get Kubernetes credentials: %w\nOutput: %s", err, string(output))
@@ -431,6 +441,8 @@ func (s *Service) getIdentityClientID(name, resourceGroup string) (string, error
 		"--output", "tsv",
 	)
 
+	fmt.Println("Executing command:", strings.Join(cmd.Args, " "))
+
 	output, err := cmd.CombinedOutput()
 	if err != nil {
 		return "", fmt.Errorf("failed to get identity client ID: %w\nOutput: %s", err, string(output))
@@ -448,6 +460,8 @@ func (s *Service) CreateIdentity(ctx context.Context, identityName string, resou
 		"--resource-group", resourceGroup,
 		"--subscription", s.subscriptionID,
 	)
+
+	fmt.Println("Executing command:", strings.Join(cmd.Args, " "))
 
 	output, err := cmd.CombinedOutput()
 	if err != nil {
@@ -505,6 +519,8 @@ func (s *Service) createFederatedCredential(identityName, clientID, clusterName,
 		"--audiences", "api://AzureADTokenExchange",
 	)
 
+	fmt.Println("Executing command:", strings.Join(cmd.Args, " "))
+
 	output, err := cmd.CombinedOutput()
 	if err != nil {
 		return fmt.Errorf("failed to create federated identity credential: %w\nOutput: %s", err, string(output))
@@ -523,6 +539,8 @@ func (s *Service) getClusterOIDCIssuerURL(clusterName, resourceGroup string) (st
 		"--query", "oidcIssuerProfile.issuerUrl",
 		"--output", "tsv",
 	)
+
+	fmt.Println("Executing command:", strings.Join(cmd.Args, " "))
 
 	output, err := cmd.CombinedOutput()
 	if err != nil {

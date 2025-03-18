@@ -21,12 +21,12 @@ func NewCosmosDBService(credential azcore.TokenCredential, subscriptionID string
 	}
 }
 
-func (s *CosmosDBService) BindCosmosDB(ctx context.Context, name, resourceGroup, identityName string) error {
+func (s *CosmosDBService) BindCosmosDB(ctx context.Context, name, resourceGroup, identityName, identityResourceGroup string) error {
 	if err := s.validateCosmosDBAccount(name, resourceGroup); err != nil {
 		return err
 	}
 
-	identityPrincipalID, err := s.getIdentityPrincipalID(identityName, resourceGroup)
+	identityPrincipalID, err := s.getIdentityPrincipalID(identityName, identityResourceGroup)
 	if err != nil {
 		return err
 	}
@@ -52,6 +52,8 @@ func (s *CosmosDBService) validateCosmosDBAccount(name, resourceGroup string) er
 		"--subscription", s.subscriptionID,
 	)
 
+	fmt.Println("Executing command:", strings.Join(cmd.Args, " "))
+
 	output, err := cmd.CombinedOutput()
 	if err != nil {
 		return fmt.Errorf("failed to check if CosmosDB exists: %w\nOutput: %s", err, string(output))
@@ -63,6 +65,8 @@ func (s *CosmosDBService) validateCosmosDBAccount(name, resourceGroup string) er
 		"--resource-group", resourceGroup,
 		"--subscription", s.subscriptionID,
 	)
+
+	fmt.Println("Executing command:", strings.Join(cmd.Args, " "))
 
 	output, err = cmd.CombinedOutput()
 	if err != nil {
@@ -82,6 +86,8 @@ func (s *CosmosDBService) getIdentityPrincipalID(name, resourceGroup string) (st
 		"--query", "principalId",
 		"--output", "tsv",
 	)
+
+	fmt.Println("Executing command:", strings.Join(cmd.Args, " "))
 
 	output, err := cmd.CombinedOutput()
 	if err != nil {
@@ -108,6 +114,8 @@ func (s *CosmosDBService) assignRoleToCosmosDB(identityPrincipalID, cosmosDBName
 		"--scope", cosmosDBResourceID,
 		"--subscription", s.subscriptionID,
 	)
+
+	fmt.Println("Executing command:", strings.Join(cmd.Args, " "))
 
 	output, err := cmd.CombinedOutput()
 	if err != nil {
@@ -145,6 +153,8 @@ func (s *CosmosDBService) getDBAndContainerInfo(name, resourceGroup string) (str
 		"--output", "tsv",
 	)
 
+	fmt.Println("Executing command:", strings.Join(dbCmd.Args, " "))
+
 	dbOutput, err := dbCmd.CombinedOutput()
 	if err != nil {
 		return "", "", fmt.Errorf("failed to get database info: %w", err)
@@ -164,6 +174,8 @@ func (s *CosmosDBService) getDBAndContainerInfo(name, resourceGroup string) (str
 		"--query", "[0].name",
 		"--output", "tsv",
 	)
+
+	fmt.Println("Executing command:", strings.Join(containerCmd.Args, " "))
 
 	containerOutput, err := containerCmd.CombinedOutput()
 	if err != nil {
