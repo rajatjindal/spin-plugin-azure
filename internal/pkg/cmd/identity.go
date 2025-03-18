@@ -58,7 +58,7 @@ func newIdentityCreateCommand() *cobra.Command {
 			}
 
 			if cfg.SubscriptionID == "" {
-				return fmt.Errorf("subscription ID not set, please set it using Azure CLI or environment variables")
+				return fmt.Errorf("subscription ID not set, please set it using `spin azure login`")
 			}
 
 			aksService, err := aks.NewService(credential, cfg.SubscriptionID)
@@ -85,6 +85,6 @@ func newIdentityCreateCommand() *cobra.Command {
 
 	cmd.Flags().StringVar(&name, "name", "workload-identity", "Name of the identity to create")
 	cmd.Flags().StringVar(&resourceGroup, "resource-group", "", "Resource group for the identity (defaults to the resource group of the current cluster)")
-	cmd.MarkFlagsRequiredTogether("name")
+	cmd.MarkFlagRequired("name")
 	return cmd
 }

@@ -40,7 +40,7 @@ func newBindCosmosDBCommand() *cobra.Command {
 			}
 
 			if cfg.SubscriptionID == "" {
-				return fmt.Errorf("subscription ID not set, please set it using Azure CLI or environment variables")
+				return fmt.Errorf("subscription ID not set, please set it using `spin azure login`")
 			}
 
 			if resourceGroup == "" {
@@ -73,7 +73,7 @@ func newBindCosmosDBCommand() *cobra.Command {
 	cmd.Flags().StringVar(&name, "name", "", "Name of the CosmosDB account (required)")
 	cmd.Flags().StringVar(&resourceGroup, "resource-group", "", "Resource group of the CosmosDB account")
 	cmd.Flags().StringVar(&identityName, "identity", "", "Name of the identity to assign roles to")
-	cmd.MarkFlagsRequiredTogether("name")
+	cmd.MarkFlagRequired("name")
 
 	return cmd
 }
