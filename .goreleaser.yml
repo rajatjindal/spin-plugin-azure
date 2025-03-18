@@ -17,11 +17,9 @@ builds:
    - arm64 
 
 archives:
-- builds:
-  - id: spin-plugin-azure
-    main: ./
-    name_template: "{{ .ProjectName }}-{{ .Version }}-{{ .Os }}-{{ .Arch }}{{ if .Arm }}v{{ .Arm }}{{ end }}"
-    wrap_in_directory: false
-    format: tar.gz
-    files:
+- id: spin-plugin-azure
+  name_template: "{{ .ProjectName }}-{{ .Version }}-{{ .Os }}-{{ .Arch }}{{ if .Arm }}v{{ .Arm }}{{ end }}"
+  wrap_in_directory: false
+  format: tar.gz
+  files:
     - LICENSE
