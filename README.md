@@ -2,10 +2,16 @@
 
 A CLI tool for deploying and managing [Spin](https://github.com/fermyon/spin) applications on Azure Kubernetes Service (AKS) with workload identity.
 
+## Install 
+
+```sh
+spin plugins update
+spin plugins install azure
+```
+
 ## Install from source
 
-Manual installation is
-commonly used to test in-flight changes. For a user, it's better to install the plugin using Spin's plugin manager.
+Manual installation is commonly used to test in-flight changes. For a user, it's better to install the plugin using Spin's plugin manager.
 
 Ensure the `pluginify` plugin is installed:
 
