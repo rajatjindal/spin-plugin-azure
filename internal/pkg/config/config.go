@@ -16,7 +16,7 @@ type Config struct {
 	ClusterName          string `json:"clusterName"`
 	Location             string `json:"location"`
 	SpinOperatorDeployed bool   `json:"spinOperatorDeployed"`
-	WorkloadIdentity     string `json:"workloadIdentity"`
+	IdentityName         string `json:"identityName"`
 }
 
 func GetConfigDir() (string, error) {

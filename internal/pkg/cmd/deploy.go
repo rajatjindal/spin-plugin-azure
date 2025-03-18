@@ -11,7 +11,7 @@ import (
 
 // NewDeployCommand creates a new deploy command
 func NewDeployCommand() *cobra.Command {
-	var from, identity string
+	var from string
 
 	cmd := &cobra.Command{
 		Use:   "deploy",
@@ -36,19 +36,19 @@ func NewDeployCommand() *cobra.Command {
 				return fmt.Errorf("--from flag is required, please specify the path to the SpinApp YAML file")
 			}
 
-			if cfg.WorkloadIdentity == "" {
-				return fmt.Errorf("no workload identity configured, please set it using the 'cluster' command")
+			if cfg.IdentityName == "" {
+				return fmt.Errorf("no identity configured, please set it using the 'identity create' command")
 			}
 
 			deployService := deploy.NewService(credential, cfg.SubscriptionID)
 
-			fmt.Printf("Deploying Spin application from '%s' using identity '%s'...\n", from, identity)
+			fmt.Printf("Deploying Spin application from '%s' using identity '%s'...\n", from, cfg.IdentityName)
 			ctx := context.Background()
-			if err := deployService.Deploy(ctx, from, identity); err != nil {
+			if err := deployService.Deploy(ctx, from, cfg.IdentityName); err != nil {
 				return fmt.Errorf("failed to deploy Spin application: %w", err)
 			}
 
-			fmt.Printf("Successfully deployed Spin application from '%s'\n", from)
+			fmt.Printf("Successfully deployed Spin application from '%s' using identity '%s'\n", from, cfg.IdentityName)
 			return nil
 		},
 	}

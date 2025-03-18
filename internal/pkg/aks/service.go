@@ -472,7 +472,7 @@ func (s *Service) CreateIdentity(ctx context.Context, identityName string, resou
 		}
 	}
 
-	cfg.WorkloadIdentity = identityName
+	cfg.IdentityName = identityName
 	if err := config.SaveConfig(cfg); err != nil {
 		return fmt.Errorf("failed to save identity name to config: %w", err)
 	}
