@@ -137,8 +137,8 @@ spin azure deploy --from path/to/spinapp.yaml
 1. **`spin azure cluster create / use`**:
    - Create a new AKS cluster with workload identity enabled
    - Install the Spin Operator
-   - Create an Azure managed identity
-   - Configure a Kubernetes service account for the identity
+
+1. **`spin azure identity create`**:
 
 1. **`spin azure assign-role`**:
    - Assign necessary Azure service roles to the workload identity
