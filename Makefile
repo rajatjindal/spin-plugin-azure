@@ -1,6 +1,6 @@
 .PHONY: build
 build:
-	go build -o bin/spin-azure cmd/spin-azure/main.go
+	go build -o bin/azure cmd/azure/main.go
 
 .PHONY: install
 install:

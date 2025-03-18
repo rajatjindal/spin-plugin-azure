@@ -30,7 +30,7 @@ func (s *Service) Deploy(ctx context.Context, spinAppYAMLPath, identityName stri
 	}
 
 	if cfg.ClusterName == "" || cfg.ResourceGroup == "" {
-		return fmt.Errorf("no cluster is currently selected, use 'spin-azure cluster use' or 'spin-azure cluster create' first")
+		return fmt.Errorf("no cluster is currently selected, use 'spin azure cluster use' or 'spin azure cluster create' first")
 	}
 
 	if _, err := os.Stat(spinAppYAMLPath); os.IsNotExist(err) {
@@ -51,7 +51,7 @@ func (s *Service) Deploy(ctx context.Context, spinAppYAMLPath, identityName stri
 	}
 
 	if !strings.Contains(string(output), identityName) {
-		return fmt.Errorf("service account '%s' not found in namespace '%s', please create it using 'spin-azure cluster use --service-account=%s' or 'spin-azure cluster create --service-account=%s'", identityName, namespace, identityName, identityName)
+		return fmt.Errorf("service account '%s' not found in namespace '%s', please create it using 'spin azure cluster use --service-account=%s' or 'spin azure cluster create --service-account=%s'", identityName, namespace, identityName, identityName)
 	}
 
 	if err := s.deploySpinAppYAML(spinAppYAMLPath); err != nil {

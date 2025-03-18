@@ -113,7 +113,7 @@ func (s *Service) CheckWorkloadIdentity(ctx context.Context) (bool, error) {
 	}
 
 	if cfg.ClusterName == "" || cfg.ResourceGroup == "" {
-		return false, fmt.Errorf("no cluster is currently selected, use 'spin-azure cluster use' first")
+		return false, fmt.Errorf("no cluster is currently selected, use 'spin azure cluster use' first")
 	}
 
 	cmd := exec.Command(
@@ -142,7 +142,7 @@ func (s *Service) EnableWorkloadIdentity(ctx context.Context) error {
 	}
 
 	if cfg.ClusterName == "" || cfg.ResourceGroup == "" {
-		return fmt.Errorf("no cluster is currently selected, use 'spin-azure cluster use' first")
+		return fmt.Errorf("no cluster is currently selected, use 'spin azure cluster use' first")
 	}
 
 	cmd := exec.Command(
@@ -170,7 +170,7 @@ func (s *Service) DeploySpinOperator(ctx context.Context) error {
 	}
 
 	if cfg.ClusterName == "" || cfg.ResourceGroup == "" {
-		return fmt.Errorf("no cluster is currently selected, use 'spin-azure cluster use' first")
+		return fmt.Errorf("no cluster is currently selected, use 'spin azure cluster use' first")
 	}
 
 	if cfg.SpinOperatorDeployed {
@@ -345,7 +345,7 @@ func (s *Service) CreateServiceAccount(ctx context.Context, identityName string)
 	}
 
 	if cfg.ClusterName == "" || cfg.ResourceGroup == "" {
-		return fmt.Errorf("no cluster is currently selected, use 'spin-azure cluster use' first")
+		return fmt.Errorf("no cluster is currently selected, use 'spin azure cluster use' first")
 	}
 
 	fmt.Println("Setting up kubectl with cluster credentials...")

@@ -161,7 +161,7 @@ func newClusterCreateCommand() *cobra.Command {
 
 	cmd.Long += `
 
-  By default, no identity is created. Use 'spin-azure identity create' after creating the cluster.
+  By default, no identity is created. Use 'spin azure identity create' after creating the cluster.
 
   Any additional arguments provided will be passed directly to 'az aks create'.
   For example, you can specify '--kubernetes-version 1.23.5' to create a cluster with a specific Kubernetes version.
