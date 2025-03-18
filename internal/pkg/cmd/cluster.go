@@ -27,15 +27,14 @@ func NewClusterCommand() *cobra.Command {
 }
 
 func newClusterCreateCommand() *cobra.Command {
-	var name, resourceGroup, location, createIdentity, nodeVMSize string
-	var skipIdentityCreation bool
+	var name, resourceGroup, location, nodeVMSize string
 	var nodeCount int
 	var additionalArgs []string
 
 	cmd := &cobra.Command{
 		Use:                "create",
 		Short:              "Create a new AKS cluster with workload identity enabled",
-		Long:               `Create a new Azure Kubernetes Service (AKS) cluster with workload identity enabled, Spin Operator installed, and a managed identity with service account configured.`,
+		Long:               `Create a new Azure Kubernetes Service (AKS) cluster with workload identity enabled and Spin Operator installed.`,
 		DisableFlagParsing: false,
 		PreRunE: func(cmd *cobra.Command, args []string) error {
 			cmd.DisableFlagParsing = true
@@ -62,13 +61,6 @@ func newClusterCreateCommand() *cobra.Command {
 						location = args[i+1]
 						i++
 					}
-				} else if arg == "--create-identity" {
-					if i+1 < len(args) && !strings.HasPrefix(args[i+1], "--") {
-						createIdentity = args[i+1]
-						i++
-					}
-				} else if arg == "--skip-identity-creation" {
-					skipIdentityCreation = true
 				} else if arg == "--node-count" {
 					if i+1 < len(args) && !strings.HasPrefix(args[i+1], "--") {
 						count, err := strconv.Atoi(args[i+1])
@@ -157,25 +149,6 @@ func newClusterCreateCommand() *cobra.Command {
 			}
 			fmt.Println("Spin Operator installed successfully")
 
-			if !skipIdentityCreation {
-				identityName := createIdentity
-				if identityName == "" {
-					identityName = "workload-identity"
-				}
-
-				fmt.Printf("Creating Azure managed identity '%s'...\n", identityName)
-				if err := aksService.CreateIdentity(ctx, identityName, resourceGroup); err != nil {
-					return fmt.Errorf("failed to create managed identity: %w", err)
-				}
-
-				fmt.Printf("Creating Kubernetes service account for identity '%s'...\n", identityName)
-				if err := aksService.CreateServiceAccount(ctx, identityName); err != nil {
-					return fmt.Errorf("failed to create service account: %w", err)
-				}
-
-				fmt.Printf("Identity and service account '%s' created successfully\n", identityName)
-			}
-
 			return nil
 		},
 	}
@@ -183,12 +156,12 @@ func newClusterCreateCommand() *cobra.Command {
 	cmd.Flags().StringVar(&name, "name", "", "Name of the AKS cluster (required)")
 	cmd.Flags().StringVar(&resourceGroup, "resource-group", "", "Resource group for the AKS cluster (required)")
 	cmd.Flags().StringVar(&location, "location", "eastus", "Azure region for the AKS cluster")
-	cmd.Flags().StringVar(&createIdentity, "create-identity", "workload-identity", "Name of the identity to create")
-	cmd.Flags().BoolVar(&skipIdentityCreation, "skip-identity-creation", false, "Skip creation of managed identity and service account")
 	cmd.Flags().IntVar(&nodeCount, "node-count", 1, "Number of nodes in the AKS cluster")
 	cmd.Flags().StringVar(&nodeVMSize, "node-vm-size", "Standard_DS2_v2", "VM size for the AKS cluster nodes")
 
 	cmd.Long += `
+
+  By default, no identity is created. Use 'spin-azure identity create' after creating the cluster.
 
   Any additional arguments provided will be passed directly to 'az aks create'.
   For example, you can specify '--kubernetes-version 1.23.5' to create a cluster with a specific Kubernetes version.
@@ -199,8 +172,8 @@ func newClusterCreateCommand() *cobra.Command {
 }
 
 func newClusterUseCommand() *cobra.Command {
-	var name, resourceGroup, createIdentity string
-	var installSpinOperator, skipIdentityCreation bool
+	var name, resourceGroup string
+	var installSpinOperator bool
 
 	cmd := &cobra.Command{
 		Use:   "use",
@@ -249,20 +222,6 @@ func newClusterUseCommand() *cobra.Command {
 				fmt.Println("Spin Operator installed successfully")
 			}
 
-			if !skipIdentityCreation && createIdentity != "" {
-				fmt.Printf("Creating Azure managed identity '%s'...\n", createIdentity)
-				if err := aksService.CreateIdentity(ctx, createIdentity, resourceGroup); err != nil {
-					return fmt.Errorf("failed to create managed identity: %w", err)
-				}
-
-				fmt.Printf("Creating Kubernetes service account for identity '%s'...\n", createIdentity)
-				if err := aksService.CreateServiceAccount(ctx, createIdentity); err != nil {
-					return fmt.Errorf("failed to create service account: %w", err)
-				}
-
-				fmt.Printf("Identity and service account '%s' created successfully\n", createIdentity)
-			}
-
 			return nil
 		},
 	}
@@ -270,8 +229,6 @@ func newClusterUseCommand() *cobra.Command {
 	cmd.Flags().StringVar(&name, "name", "", "Name of the existing AKS cluster (required)")
 	cmd.Flags().StringVar(&resourceGroup, "resource-group", "", "Resource group of the existing AKS cluster")
 	cmd.Flags().BoolVar(&installSpinOperator, "install-spin-operator", false, "Install Spin Operator on the cluster after selection")
-	cmd.Flags().StringVar(&createIdentity, "create-identity", "", "Name of the identity to create")
-	cmd.Flags().BoolVar(&skipIdentityCreation, "skip-identity-creation", false, "Skip creation of managed identity and service account")
 	cmd.MarkFlagsRequiredTogether("name")
 	return cmd
 }

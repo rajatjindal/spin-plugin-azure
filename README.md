@@ -53,16 +53,8 @@ spin azure cluster create --name my-cluster --resource-group my-rg --location ea
 This creates a complete environment in one command:
 - AKS cluster with workload identity enabled
 - Spin Operator installed
-- Azure managed identity called "workload-identity"
-- Kubernetes service account configured for the identity
 
-You can specify a custom identity name:
-
-```bash
-spin azure cluster create --name my-cluster --resource-group my-rg --create-identity=my-custom-identity
-```
-
-You can also specify any additional `az aks create` arguments, which will be passed directly to the underlying Azure CLI:
+You can specify any additional `az aks create` arguments, which will be passed directly to the underlying Azure CLI:
 
 ```bash
 spin azure cluster create --name my-cluster --resource-group my-rg -- --kubernetes-version 1.24.9 --node-count 3 --node-vm-size Standard_D4s_v3 --zones 1 2 3
@@ -82,10 +74,11 @@ When using an existing cluster, you can optionally install the Spin Operator:
 spin azure cluster use --name existing-cluster --resource-group existing-rg --install-spin-operator
 ```
 
-And you can create an identity at the same time:
+### Create a new identity
 
 ```bash
-spin azure cluster use --name existing-cluster --resource-group existing-rg --create-identity=my-custom-identity
+spin azure identity create # will create a new identity called "workload-identity"
+spin azure identity create --name my-custom-identity # will create a new identity called "my-custom-identity"
 ```
 
 ### Check workload identity status
@@ -94,7 +87,7 @@ spin azure cluster use --name existing-cluster --resource-group existing-rg --cr
 spin azure cluster check-identity
 ```
 
-This checks if workload identity is enabled on the current cluster, and enables it if not.
+This checks if workload identity is **enabled** on the current cluster, and enables it if not. This command does not create an Azure managed identity or service account. Please use `spin azure identity create` to create an identity.
 
 ### Install Spin Operator
 
@@ -104,10 +97,18 @@ You can install the Spin Operator on an existing cluster:
 spin azure cluster install-spin-operator
 ```
 
+Note: the `spin azure cluster create` command also installs the Spin Operator by default.
+
 ### Assign Role to Azure CosmosDB
 
 ```bash
-spin azure assign-role cosmosdb --name my-cosmos --resource-group my-rg
+spin azure assign-role cosmosdb --name my-cosmos --resource-group my-rg # will assign the role to the identity called "workload-identity"
+```
+
+Or specify an existing identity:
+
+```bash
+spin azure assign-role cosmosdb --name my-cosmos --resource-group my-rg --identity my-custom-identity
 ```
 
 This assigns the necessary RBAC roles to your workload identity, allowing it to access the specified CosmosDB instance.
@@ -118,14 +119,6 @@ You can deploy a Spin application to your cluster with a simple command:
 
 ```bash
 spin azure deploy --from path/to/spinapp.yaml
-```
-
-This will deploy the application using the default "workload-identity" that was created with the cluster.
-
-If you want to use a custom identity, you can specify it with the --identity flag:
-
-```bash
-spin azure deploy --from path/to/spinapp.yaml --identity my-custom-identity
 ```
 
 > warning: since SpinApp CRD does not support serviceAccountName yet, you need to edit the deployment YAML file to set the `serviceAccountName` field to `workload-identity`.
@@ -144,8 +137,8 @@ spin azure deploy --from path/to/spinapp.yaml --identity my-custom-identity
 1. **`spin azure cluster create / use`**:
    - Create a new AKS cluster with workload identity enabled
    - Install the Spin Operator
-   - Create an Azure managed identity
-   - Configure a Kubernetes service account for the identity
+
+1. **`spin azure identity create`**:
 
 1. **`spin azure assign-role`**:
    - Assign necessary Azure service roles to the workload identity

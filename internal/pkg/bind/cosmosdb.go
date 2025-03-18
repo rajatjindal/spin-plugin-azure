@@ -7,7 +7,6 @@ import (
 	"strings"
 
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore"
-	"github.com/spinframework/spin-plugin-azure/internal/pkg/config"
 )
 
 type CosmosDBService struct {
@@ -22,21 +21,12 @@ func NewCosmosDBService(credential azcore.TokenCredential, subscriptionID string
 	}
 }
 
-func (s *CosmosDBService) BindCosmosDB(ctx context.Context, name, resourceGroup string) error {
-	cfg, err := config.LoadConfig()
-	if err != nil {
-		return fmt.Errorf("failed to load config: %w", err)
-	}
-
-	if cfg.WorkloadIdentity == "" {
-		return fmt.Errorf("no workload identity configured, use 'spin-azure cluster' first")
-	}
-
+func (s *CosmosDBService) BindCosmosDB(ctx context.Context, name, resourceGroup, identityName string) error {
 	if err := s.validateCosmosDBAccount(name, resourceGroup); err != nil {
 		return err
 	}
 
-	identityPrincipalID, err := s.getIdentityPrincipalID(cfg.WorkloadIdentity, cfg.ResourceGroup)
+	identityPrincipalID, err := s.getIdentityPrincipalID(identityName, resourceGroup)
 	if err != nil {
 		return err
 	}
@@ -45,7 +35,7 @@ func (s *CosmosDBService) BindCosmosDB(ctx context.Context, name, resourceGroup 
 		return err
 	}
 
-	fmt.Printf("Successfully bound CosmosDB '%s' to identity '%s'\n", name, cfg.WorkloadIdentity)
+	fmt.Printf("Successfully bound CosmosDB '%s' to identity '%s'\n", name, identityName)
 
 	dbName, containerName, err := s.getDBAndContainerInfo(name, resourceGroup)
 	if err == nil && dbName != "" && containerName != "" {
