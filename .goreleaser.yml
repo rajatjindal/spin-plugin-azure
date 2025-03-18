@@ -2,8 +2,8 @@ version: 2
 
 builds:
 - id: spin-plugin-azure
-  main: ./cmd/spin-azure/main.go
-  binary: spin-azure
+  main: ./cmd/azure/main.go
+  binary: azure
   env:
    - CGO_ENABLED=0
   ldflags:

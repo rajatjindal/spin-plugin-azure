@@ -41,7 +41,7 @@ func newIdentityCreateCommand() *cobra.Command {
 				}
 
 				if cfg.ResourceGroup == "" {
-					return fmt.Errorf("--resource-group is required or use 'spin-azure cluster use' to select a cluster first")
+					return fmt.Errorf("--resource-group is required or use 'spin azure cluster use' to select a cluster first")
 				}
 
 				resourceGroup = cfg.ResourceGroup
