@@ -83,7 +83,9 @@ func newBindCosmosDBCommand() *cobra.Command {
 	cmd.Flags().StringVar(&resourceGroup, "resource-group", "", "Resource group of the CosmosDB account")
 	cmd.Flags().StringVar(&identityName, "identity", "", "Name of the identity to assign roles to")
 	cmd.Flags().StringVar(&identityResourceGroup, "identity-resource-group", "", "Resource group of the managed identity (defaults to the CosmosDB resource group if not specified)")
-	cmd.MarkFlagRequired("name")
+	if err := cmd.MarkFlagRequired("name"); err != nil {
+		panic(fmt.Sprintf("failed to mark flag 'from' as required: %v", err))
+	}
 
 	return cmd
 }

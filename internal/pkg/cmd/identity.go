@@ -85,6 +85,8 @@ func newIdentityCreateCommand() *cobra.Command {
 
 	cmd.Flags().StringVar(&name, "name", "workload-identity", "Name of the identity to create")
 	cmd.Flags().StringVar(&resourceGroup, "resource-group", "", "Resource group for the identity (defaults to the resource group of the current cluster)")
-	cmd.MarkFlagRequired("name")
+	if err := cmd.MarkFlagRequired("name"); err != nil {
+		panic(fmt.Sprintf("failed to mark flag 'name' as required: %v", err))
+	}
 	return cmd
 }

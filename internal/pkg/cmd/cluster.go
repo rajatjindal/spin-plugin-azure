@@ -229,7 +229,9 @@ func newClusterUseCommand() *cobra.Command {
 	cmd.Flags().StringVar(&name, "name", "", "Name of the existing AKS cluster (required)")
 	cmd.Flags().StringVar(&resourceGroup, "resource-group", "", "Resource group of the existing AKS cluster")
 	cmd.Flags().BoolVar(&installSpinOperator, "install-spin-operator", false, "Install Spin Operator on the cluster after selection")
-	cmd.MarkFlagRequired("name")
+	if err := cmd.MarkFlagRequired("name"); err != nil {
+		panic(fmt.Sprintf("failed to mark flag 'name' as required: %v", err))
+	}
 	return cmd
 }
 
