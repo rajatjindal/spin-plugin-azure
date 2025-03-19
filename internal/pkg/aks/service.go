@@ -489,7 +489,7 @@ func (s *Service) CreateIdentity(ctx context.Context, identityName string, resou
 }
 
 // UseIdentity sets the current identity in the configuration
-func (s *Service) UseIdentity(ctx context.Context, identityName string, resourceGroup string) error {
+func (s *Service) UseIdentity(ctx context.Context, identityName string, resourceGroup string, createServiceAccount bool) error {
 	clientID, err := s.getIdentityClientID(identityName, resourceGroup)
 	if err != nil {
 		return fmt.Errorf("failed to find managed identity '%s': %w", identityName, err)
@@ -498,6 +498,23 @@ func (s *Service) UseIdentity(ctx context.Context, identityName string, resource
 	cfg, err := config.LoadConfig()
 	if err != nil {
 		return fmt.Errorf("failed to load config: %w", err)
+	}
+
+	if cfg.ClusterName == "" || cfg.ResourceGroup == "" {
+		return fmt.Errorf("no cluster is currently selected, use 'spin azure cluster use' first")
+	}
+
+	if createServiceAccount {
+
+		fmt.Printf("Creating Kubernetes service account for identity '%s'...\n", identityName)
+		if err := s.CreateServiceAccount(ctx, identityName); err != nil {
+			return fmt.Errorf("failed to create service account: %w", err)
+		}
+
+		fmt.Printf("Creating federated credential for identity '%s'...\n", identityName)
+		if err := s.createFederatedCredential(identityName, clientID, cfg.ClusterName, resourceGroup); err != nil {
+			return fmt.Errorf("failed to create federated credential: %w", err)
+		}
 	}
 
 	cfg.IdentityName = identityName

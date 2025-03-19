@@ -94,6 +94,7 @@ func newIdentityCreateCommand() *cobra.Command {
 
 func newIdentityUseCommand() *cobra.Command {
 	var name, resourceGroup string
+	var createServiceAccount bool
 
 	cmd := &cobra.Command{
 		Use:   "use",
@@ -129,7 +130,7 @@ func newIdentityUseCommand() *cobra.Command {
 
 			ctx := context.Background()
 
-			if err := aksService.UseIdentity(ctx, name, resourceGroup); err != nil {
+			if err := aksService.UseIdentity(ctx, name, resourceGroup, createServiceAccount); err != nil {
 				return fmt.Errorf("failed to use identity: %w", err)
 			}
 
@@ -140,6 +141,7 @@ func newIdentityUseCommand() *cobra.Command {
 
 	cmd.Flags().StringVar(&name, "name", "", "Name of the identity to use (required)")
 	cmd.Flags().StringVar(&resourceGroup, "resource-group", "", "Resource group containing the identity (defaults to the resource group of the current cluster)")
+	cmd.Flags().BoolVar(&createServiceAccount, "create-service-account", false, "Create a Kubernetes service account for this identity")
 	cmd.MarkFlagRequired("name")
 	return cmd
 }
