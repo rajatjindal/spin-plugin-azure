@@ -17,6 +17,7 @@ func NewIdentityCommand() *cobra.Command {
 	}
 
 	cmd.AddCommand(newIdentityCreateCommand())
+	cmd.AddCommand(newIdentityUseCommand())
 
 	return cmd
 }
@@ -88,5 +89,57 @@ func newIdentityCreateCommand() *cobra.Command {
 	if err := cmd.MarkFlagRequired("name"); err != nil {
 		panic(fmt.Sprintf("failed to mark flag 'name' as required: %v", err))
 	}
+	return cmd
+}
+
+func newIdentityUseCommand() *cobra.Command {
+	var name, resourceGroup string
+
+	cmd := &cobra.Command{
+		Use:   "use",
+		Short: "Set the current Azure managed identity",
+		Long:  `Set the current Azure managed identity`,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			cfg, err := config.LoadConfig()
+			if err != nil {
+				return fmt.Errorf("failed to load config: %w", err)
+			}
+
+			if cfg.SubscriptionID == "" {
+				return fmt.Errorf("subscription ID not set, please set it using `spin azure login`")
+			}
+
+			if resourceGroup == "" {
+				if cfg.ResourceGroup == "" {
+					return fmt.Errorf("--resource-group is required or use 'spin azure cluster use' to select a cluster first")
+				}
+
+				resourceGroup = cfg.ResourceGroup
+			}
+
+			credential, err := config.GetAzureCredential()
+			if err != nil {
+				return fmt.Errorf("failed to get Azure credential: %w", err)
+			}
+
+			aksService, err := aks.NewService(credential, cfg.SubscriptionID)
+			if err != nil {
+				return fmt.Errorf("failed to create AKS service: %w", err)
+			}
+
+			ctx := context.Background()
+
+			if err := aksService.UseIdentity(ctx, name, resourceGroup); err != nil {
+				return fmt.Errorf("failed to use identity: %w", err)
+			}
+
+			fmt.Printf("Using identity '%s' for Spin workloads\n", name)
+			return nil
+		},
+	}
+
+	cmd.Flags().StringVar(&name, "name", "", "Name of the identity to use (required)")
+	cmd.Flags().StringVar(&resourceGroup, "resource-group", "", "Resource group containing the identity (defaults to the resource group of the current cluster)")
+	cmd.MarkFlagRequired("name")
 	return cmd
 }

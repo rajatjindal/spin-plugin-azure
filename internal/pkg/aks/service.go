@@ -179,11 +179,6 @@ func (s *Service) DeploySpinOperator(ctx context.Context) error {
 		return fmt.Errorf("no cluster is currently selected, use 'spin azure cluster use' first")
 	}
 
-	if cfg.SpinOperatorDeployed {
-		fmt.Println("Spin Operator is already deployed, skipping")
-		return nil
-	}
-
 	fmt.Println("Setting up kubectl with cluster credentials...")
 	getCredsCmd := exec.Command(
 		"az", "aks", "get-credentials",
@@ -334,8 +329,6 @@ func (s *Service) DeploySpinOperator(ctx context.Context) error {
 	if err != nil {
 		return fmt.Errorf("failed to apply shim executor configuration: %w\nOutput: %s", err, string(output))
 	}
-
-	cfg.SpinOperatorDeployed = true
 
 	if err := config.SaveConfig(cfg); err != nil {
 		return fmt.Errorf("failed to save config: %w", err)
@@ -492,6 +485,28 @@ func (s *Service) CreateIdentity(ctx context.Context, identityName string, resou
 	}
 
 	fmt.Printf("Created managed identity '%s' with client ID '%s'\n", identityName, clientID)
+	return nil
+}
+
+// UseIdentity sets the current identity in the configuration
+func (s *Service) UseIdentity(ctx context.Context, identityName string, resourceGroup string) error {
+	clientID, err := s.getIdentityClientID(identityName, resourceGroup)
+	if err != nil {
+		return fmt.Errorf("failed to find managed identity '%s': %w", identityName, err)
+	}
+
+	cfg, err := config.LoadConfig()
+	if err != nil {
+		return fmt.Errorf("failed to load config: %w", err)
+	}
+
+	cfg.IdentityName = identityName
+
+	if err := config.SaveConfig(cfg); err != nil {
+		return fmt.Errorf("failed to save config: %w", err)
+	}
+
+	fmt.Printf("Now using identity '%s' with client ID '%s'\n", identityName, clientID)
 	return nil
 }
 

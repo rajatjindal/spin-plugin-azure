@@ -47,7 +47,6 @@ func newConfigShowCommand() *cobra.Command {
 				fmt.Printf("  Cluster Name: %s\n", cfg.ClusterName)
 				fmt.Printf("  Location: %s\n", cfg.Location)
 				fmt.Printf("  Identity Name: %s\n", cfg.IdentityName)
-				fmt.Printf("  Spin Operator Deployed: %v\n", cfg.SpinOperatorDeployed)
 			}
 
 			return nil
