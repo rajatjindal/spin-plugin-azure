@@ -87,6 +87,16 @@ spin azure identity create # will create a new identity called "workload-identit
 spin azure identity create --name my-custom-identity # will create a new identity called "my-custom-identity"
 ```
 
+### Use an existing identity
+
+```bash
+spin azure identity use --name my-custom-identity --create-service-account
+```
+
+This command sets the specified identity as the current one in your configuration, and creates a Kubernetes service account and federated credential for it.
+
+This is particularly useful when if you're switching to a different cluster and need to update federation
+
 ### Check workload identity status
 
 ```bash
@@ -141,15 +151,17 @@ spin azure deploy --from path/to/spinapp.yaml
    - This YAML specifies how to deploy your Spin app in Kubernetes using the Spin Operator
 
 1. **`spin azure cluster create / use`**:
-   - Create a new AKS cluster with workload identity enabled
+   - Create / Use an AKS cluster with workload identity enabled
    - Install the Spin Operator
 
-1. **`spin azure identity create`**:
+1. **`spin azure identity create / use`**:
+   - Create / Use an Azure managed identity
+   - Create a Kubernetes service account and federated credential for the identity
 
 1. **`spin azure assign-role`**:
    - Assign necessary Azure service roles to the workload identity
 
-1. **`spin azure deploy`**:
+1. **`spin azure deploy --from <path to yaml>`**:
    - Use `spin azure deploy --from <path to yaml>` to deploy this YAML to your AKS cluster
 
 ## Mermaid Diagram
