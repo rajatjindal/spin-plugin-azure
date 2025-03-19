@@ -29,7 +29,7 @@ func NewDeployCommand() *cobra.Command {
 			}
 
 			if cfg.SubscriptionID == "" {
-				return fmt.Errorf("subscription ID not set, please set it using Azure CLI or environment variables")
+				return fmt.Errorf("subscription ID not set, please set it using `spin azure login`")
 			}
 
 			if from == "" {

@@ -102,7 +102,7 @@ func newClusterCreateCommand() *cobra.Command {
 			}
 
 			if cfg.SubscriptionID == "" {
-				return fmt.Errorf("subscription ID not set, please set it using Azure CLI or environment variables")
+				return fmt.Errorf("subscription ID not set, please set it using `spin azure login`")
 			}
 
 			aksService, err := aks.NewService(credential, cfg.SubscriptionID)
@@ -191,7 +191,7 @@ func newClusterUseCommand() *cobra.Command {
 			}
 
 			if cfg.SubscriptionID == "" {
-				return fmt.Errorf("subscription ID not set, please set it using Azure CLI or environment variables")
+				return fmt.Errorf("subscription ID not set, please set it using `spin azure login`")
 			}
 
 			if resourceGroup == "" {
@@ -229,7 +229,9 @@ func newClusterUseCommand() *cobra.Command {
 	cmd.Flags().StringVar(&name, "name", "", "Name of the existing AKS cluster (required)")
 	cmd.Flags().StringVar(&resourceGroup, "resource-group", "", "Resource group of the existing AKS cluster")
 	cmd.Flags().BoolVar(&installSpinOperator, "install-spin-operator", false, "Install Spin Operator on the cluster after selection")
-	cmd.MarkFlagsRequiredTogether("name")
+	if err := cmd.MarkFlagRequired("name"); err != nil {
+		panic(fmt.Sprintf("failed to mark flag 'name' as required: %v", err))
+	}
 	return cmd
 }
 
@@ -250,7 +252,7 @@ func newClusterCheckIdentityCommand() *cobra.Command {
 			}
 
 			if cfg.SubscriptionID == "" {
-				return fmt.Errorf("subscription ID not set, please set it using Azure CLI or environment variables")
+				return fmt.Errorf("subscription ID not set, please set it using `spin azure login`")
 			}
 
 			aksService, err := aks.NewService(credential, cfg.SubscriptionID)
@@ -300,7 +302,7 @@ func newClusterInstallSpinOperatorCommand() *cobra.Command {
 			}
 
 			if cfg.SubscriptionID == "" {
-				return fmt.Errorf("subscription ID not set, please set it using Azure CLI or environment variables")
+				return fmt.Errorf("subscription ID not set, please set it using `spin azure login`")
 			}
 
 			aksService, err := aks.NewService(credential, cfg.SubscriptionID)
