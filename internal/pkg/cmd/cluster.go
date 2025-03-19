@@ -130,8 +130,6 @@ func newClusterCreateCommand() *cobra.Command {
 				}
 			}
 
-			fmt.Printf("Creating AKS cluster '%s' in resource group '%s' with %d nodes (VM size: %s)...\n",
-				name, resourceGroup, nodeCount, nodeVMSize)
 			if len(additionalArgs) > 0 {
 				fmt.Println("Additional arguments passed to az aks create:", additionalArgs)
 			}

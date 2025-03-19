@@ -6,10 +6,37 @@ import (
 	"os"
 	"os/exec"
 	"strings"
+	"time"
 
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore"
 	"github.com/spinframework/spin-plugin-azure/internal/pkg/config"
 )
+
+func runSpinner(prefix string) chan struct{} {
+	done := make(chan struct{})
+	spinner := []string{"|", "/", "-", "\\"}
+	i := 0
+
+	fmt.Printf("\r%s %s", prefix, spinner[0])
+
+	go func() {
+		ticker := time.NewTicker(200 * time.Millisecond)
+		defer ticker.Stop()
+
+		for {
+			select {
+			case <-ticker.C:
+				i = (i + 1) % len(spinner)
+				fmt.Printf("\r%s %s", prefix, spinner[i])
+			case <-done:
+				fmt.Printf("\r%s Done!\n", prefix)
+				return
+			}
+		}
+	}()
+
+	return done
+}
 
 // Service provides operations for Azure Kubernetes Service (AKS)
 type Service struct {
@@ -44,9 +71,13 @@ func (s *Service) CreateCluster(ctx context.Context, resourceGroup, clusterName,
 	args = append(args, additionalArgs...)
 
 	fmt.Println("Creating AKS cluster with args:", strings.Join(args, " "))
-	cmd := exec.Command("az", args...)
+	spinnerDone := runSpinner("creating AKS cluster...")
 
+	cmd := exec.Command("az", args...)
 	output, err := cmd.CombinedOutput()
+
+	close(spinnerDone)
+
 	if err != nil {
 		return fmt.Errorf("failed to create AKS cluster: %w\nOutput: %s", err, string(output))
 	}
