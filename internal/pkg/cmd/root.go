@@ -36,7 +36,10 @@ and deploy Spin apps to them.`,
   spin azure deploy --from path/to/spinapp.yaml
  
   # Output the config
-  spin azure config show`,
+  spin azure config show
+
+  # Reset the config
+  spin azure config reset -y`,
 	}
 
 	cmd.AddCommand(NewLoginCommand())
