@@ -87,6 +87,14 @@ spin azure identity create # will create a new identity called "workload-identit
 spin azure identity create --name my-custom-identity # will create a new identity called "my-custom-identity"
 ```
 
+This command creates an Azure managed identity, sets up a Kubernetes service account and federated credential for it. If you don't have a cluster selected, you can use the `--skip-service-account` flag:
+
+```bash
+spin azure identity create --name my-identity --resource-group my-rg --skip-service-account
+```
+
+This will create just the Azure managed identity without Kubernetes service account or federated credentials. Later, when you have a cluster, you can add those using the `identity use` command described in [Use an existing identity](#use-an-existing-identity) section.
+
 ### Use an existing identity
 
 ```bash

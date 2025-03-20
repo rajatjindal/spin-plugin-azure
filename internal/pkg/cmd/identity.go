@@ -24,6 +24,7 @@ func NewIdentityCommand() *cobra.Command {
 
 func newIdentityCreateCommand() *cobra.Command {
 	var name, resourceGroup string
+	var skipServiceAccount bool
 
 	cmd := &cobra.Command{
 		Use:   "create",
@@ -32,25 +33,6 @@ func newIdentityCreateCommand() *cobra.Command {
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if name == "" {
 				name = "workload-identity"
-			}
-
-			// Load resource group from config if not provided
-			if resourceGroup == "" {
-				cfg, err := config.LoadConfig()
-				if err != nil {
-					return fmt.Errorf("failed to load config: %w", err)
-				}
-
-				if cfg.ResourceGroup == "" {
-					return fmt.Errorf("--resource-group is required or use 'spin azure cluster use' to select a cluster first")
-				}
-
-				resourceGroup = cfg.ResourceGroup
-			}
-
-			credential, err := config.GetAzureCredential()
-			if err != nil {
-				return fmt.Errorf("failed to get Azure credential: %w", err)
 			}
 
 			cfg, err := config.LoadConfig()
@@ -62,6 +44,19 @@ func newIdentityCreateCommand() *cobra.Command {
 				return fmt.Errorf("subscription ID not set, please set it using `spin azure login`")
 			}
 
+			if resourceGroup == "" {
+				resourceGroup = cfg.ResourceGroup
+			}
+
+			if resourceGroup == "" {
+				return fmt.Errorf("resource group is required, please specify with --resource-group")
+			}
+
+			credential, err := config.GetAzureCredential()
+			if err != nil {
+				return fmt.Errorf("failed to get Azure credential: %w", err)
+			}
+
 			aksService, err := aks.NewService(credential, cfg.SubscriptionID)
 			if err != nil {
 				return fmt.Errorf("failed to create AKS service: %w", err)
@@ -69,23 +64,18 @@ func newIdentityCreateCommand() *cobra.Command {
 
 			ctx := context.Background()
 
-			fmt.Printf("Creating Azure managed identity '%s'...\n", name)
-			if err := aksService.CreateIdentity(ctx, name, resourceGroup); err != nil {
+			createServiceAccount := !skipServiceAccount
+			if err := aksService.CreateIdentity(ctx, name, resourceGroup, createServiceAccount); err != nil {
 				return fmt.Errorf("failed to create managed identity: %w", err)
 			}
 
-			fmt.Printf("Creating Kubernetes service account for identity '%s'...\n", name)
-			if err := aksService.CreateServiceAccount(ctx, name); err != nil {
-				return fmt.Errorf("failed to create service account: %w", err)
-			}
-
-			fmt.Printf("Identity and service account '%s' created successfully\n", name)
 			return nil
 		},
 	}
 
 	cmd.Flags().StringVar(&name, "name", "workload-identity", "Name of the identity to create")
 	cmd.Flags().StringVar(&resourceGroup, "resource-group", "", "Resource group for the identity (defaults to the resource group of the current cluster)")
+	cmd.Flags().BoolVar(&skipServiceAccount, "skip-service-account", false, "Skip Kubernetes service account creation (default to false)")
 	if err := cmd.MarkFlagRequired("name"); err != nil {
 		panic(fmt.Sprintf("failed to mark flag 'name' as required: %v", err))
 	}
