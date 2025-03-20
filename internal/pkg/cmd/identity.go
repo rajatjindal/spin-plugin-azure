@@ -142,6 +142,8 @@ func newIdentityUseCommand() *cobra.Command {
 	cmd.Flags().StringVar(&name, "name", "", "Name of the identity to use (required)")
 	cmd.Flags().StringVar(&resourceGroup, "resource-group", "", "Resource group containing the identity (defaults to the resource group of the current cluster)")
 	cmd.Flags().BoolVar(&createServiceAccount, "create-service-account", false, "Create a Kubernetes service account for this identity")
-	cmd.MarkFlagRequired("name")
+	if err := cmd.MarkFlagRequired("name"); err != nil {
+		panic(fmt.Sprintf("failed to mark flag 'name' as required: %v", err))
+	}
 	return cmd
 }
