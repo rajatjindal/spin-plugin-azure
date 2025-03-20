@@ -476,7 +476,16 @@ func (s *Service) getIdentityClientID(name, resourceGroup string) (string, error
 }
 
 // CreateIdentity creates an Azure managed identity and sets up federated credentials
-func (s *Service) CreateIdentity(ctx context.Context, identityName string, resourceGroup string) error {
+func (s *Service) CreateIdentity(ctx context.Context, identityName string, resourceGroup string, createServiceAccount bool) error {
+	cfg, err := config.LoadConfig()
+	if err != nil {
+		return fmt.Errorf("failed to load config: %w", err)
+	}
+
+	if createServiceAccount && (cfg.ClusterName == "" || cfg.ResourceGroup == "") {
+		return fmt.Errorf("no cluster is currently selected, use 'spin azure cluster use' first or set createServiceAccount to false")
+	}
+
 	fmt.Printf("Creating managed identity '%s'...\n", identityName)
 	cmd := exec.Command(
 		"az", "identity", "create",
@@ -497,15 +506,14 @@ func (s *Service) CreateIdentity(ctx context.Context, identityName string, resou
 		return fmt.Errorf("failed to get identity client ID: %w", err)
 	}
 
-	cfg, err := config.LoadConfig()
-	if err != nil {
-		return fmt.Errorf("failed to load config: %w", err)
-	}
+	if createServiceAccount {
+		fmt.Printf("Creating Kubernetes service account for identity '%s'...\n", identityName)
+		if err := s.CreateServiceAccount(ctx, identityName); err != nil {
+			return fmt.Errorf("failed to create service account: %w", err)
+		}
 
-	clusterName := cfg.ClusterName
-
-	if clusterName != "" {
-		if err := s.createFederatedCredential(identityName, clientID, clusterName, resourceGroup); err != nil {
+		fmt.Printf("Creating federated credential for identity '%s'...\n", identityName)
+		if err := s.createFederatedCredential(identityName, clientID, cfg.ClusterName, resourceGroup); err != nil {
 			return fmt.Errorf("failed to create federated identity credential: %w", err)
 		}
 	}
