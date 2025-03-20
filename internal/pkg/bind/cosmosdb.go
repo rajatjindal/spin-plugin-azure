@@ -37,11 +37,6 @@ func (s *CosmosDBService) BindCosmosDB(ctx context.Context, name, resourceGroup,
 
 	fmt.Printf("Successfully bound CosmosDB '%s' to identity '%s'\n", name, identityName)
 
-	dbName, containerName, err := s.getDBAndContainerInfo(name, resourceGroup)
-	if err == nil && dbName != "" && containerName != "" {
-		fmt.Printf("CosmosDB Database: %s, Container: %s\n", dbName, containerName)
-	}
-
 	return nil
 }
 
@@ -141,47 +136,4 @@ func (s *CosmosDBService) getCosmosDBResourceID(name, resourceGroup string) (str
 	}
 
 	return strings.TrimSpace(string(output)), nil
-}
-
-func (s *CosmosDBService) getDBAndContainerInfo(name, resourceGroup string) (string, string, error) {
-	dbCmd := exec.Command(
-		"az", "cosmosdb", "sql", "database", "list",
-		"--account-name", name,
-		"--resource-group", resourceGroup,
-		"--subscription", s.subscriptionID,
-		"--query", "[0].name",
-		"--output", "tsv",
-	)
-
-	fmt.Println("Executing command:", strings.Join(dbCmd.Args, " "))
-
-	dbOutput, err := dbCmd.CombinedOutput()
-	if err != nil {
-		return "", "", fmt.Errorf("failed to get database info: %w", err)
-	}
-
-	dbName := strings.TrimSpace(string(dbOutput))
-	if dbName == "" {
-		return "", "", fmt.Errorf("no SQL database found in account %s", name)
-	}
-
-	containerCmd := exec.Command(
-		"az", "cosmosdb", "sql", "container", "list",
-		"--account-name", name,
-		"--database-name", dbName,
-		"--resource-group", resourceGroup,
-		"--subscription", s.subscriptionID,
-		"--query", "[0].name",
-		"--output", "tsv",
-	)
-
-	fmt.Println("Executing command:", strings.Join(containerCmd.Args, " "))
-
-	containerOutput, err := containerCmd.CombinedOutput()
-	if err != nil {
-		return dbName, "", fmt.Errorf("failed to get container info: %w", err)
-	}
-
-	containerName := strings.TrimSpace(string(containerOutput))
-	return dbName, containerName, nil
 }
