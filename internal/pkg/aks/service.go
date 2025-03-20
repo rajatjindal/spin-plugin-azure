@@ -89,7 +89,6 @@ func (s *Service) CreateCluster(ctx context.Context, resourceGroup, clusterName,
 
 	cfg.ClusterName = clusterName
 	cfg.ResourceGroup = resourceGroup
-	cfg.Location = location
 
 	if err := config.SaveConfig(cfg); err != nil {
 		return fmt.Errorf("failed to save config: %w", err)

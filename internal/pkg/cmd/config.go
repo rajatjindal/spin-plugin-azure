@@ -46,7 +46,6 @@ func newConfigShowCommand() *cobra.Command {
 				fmt.Printf("  Subscription ID: %s\n", cfg.SubscriptionID)
 				fmt.Printf("  Resource Group: %s\n", cfg.ResourceGroup)
 				fmt.Printf("  Cluster Name: %s\n", cfg.ClusterName)
-				fmt.Printf("  Location: %s\n", cfg.Location)
 				fmt.Printf("  Identity Name: %s\n", cfg.IdentityName)
 			}
 
@@ -70,7 +69,9 @@ func newConfigResetCommand() *cobra.Command {
 			if !yes {
 				fmt.Print("Are you sure you want to reset all configuration? This will remove all saved settings. [y/N]: ")
 				var response string
-				fmt.Scanln(&response)
+				if _, err := fmt.Scanln(&response); err != nil {
+					return fmt.Errorf("failed to read response: %w", err)
+				}
 				if response != "y" && response != "Y" {
 					fmt.Println("Reset cancelled.")
 					return nil

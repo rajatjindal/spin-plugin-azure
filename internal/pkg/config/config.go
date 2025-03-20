@@ -14,7 +14,6 @@ type Config struct {
 	TenantID       string `json:"tenantId"`
 	ResourceGroup  string `json:"resourceGroup"`
 	ClusterName    string `json:"clusterName"`
-	Location       string `json:"location"`
 	IdentityName   string `json:"identityName"`
 }
 
