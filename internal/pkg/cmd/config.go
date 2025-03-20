@@ -16,6 +16,7 @@ func NewConfigCommand() *cobra.Command {
 	}
 
 	cmd.AddCommand(newConfigShowCommand())
+	cmd.AddCommand(newConfigResetCommand())
 
 	return cmd
 }
@@ -54,6 +55,40 @@ func newConfigShowCommand() *cobra.Command {
 	}
 
 	cmd.Flags().StringVarP(&outputFormat, "output", "o", "text", "Output format (text|json)")
+
+	return cmd
+}
+
+func newConfigResetCommand() *cobra.Command {
+	var yes bool
+
+	cmd := &cobra.Command{
+		Use:   "reset",
+		Short: "Reset configuration to defaults",
+		Long:  `Reset all configuration settings to their default values.`,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			if !yes {
+				fmt.Print("Are you sure you want to reset all configuration? This will remove all saved settings. [y/N]: ")
+				var response string
+				fmt.Scanln(&response)
+				if response != "y" && response != "Y" {
+					fmt.Println("Reset cancelled.")
+					return nil
+				}
+			}
+
+			defaultConfig := &config.Config{}
+
+			if err := config.SaveConfig(defaultConfig); err != nil {
+				return fmt.Errorf("failed to reset config: %w", err)
+			}
+
+			fmt.Println("Configuration has been reset to defaults.")
+			return nil
+		},
+	}
+
+	cmd.Flags().BoolVarP(&yes, "yes", "y", false, "Force reset without confirmation")
 
 	return cmd
 }
