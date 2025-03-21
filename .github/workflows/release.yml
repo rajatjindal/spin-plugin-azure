@@ -34,9 +34,9 @@ jobs:
         GITHUB_TOKEN: ${{ github.token }}
 
     - name: Release Plugin
-      uses: rajatjindal/spin-plugin-releaser@v1
+      uses: rajatjindal/spin-plugin-releaser@why-undefined
       with:
         github_token: ${{ github.token }}
         upload_checksums: true
         template_file: contrib/spin-plugin.json.tmpl
-        release_webhook_url: "https://spinpluginreleasebot-staging.rajatjindal.com"
+        release_webhook_url: "https://spin-plugin-releaser-staging.fermyon.app"
