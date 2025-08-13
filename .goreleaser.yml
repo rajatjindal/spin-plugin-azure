@@ -7,7 +7,7 @@ builds:
   env:
    - CGO_ENABLED=0
   ldflags:
-   - "-s -w -X github.com/spinkube/spin-plugin-azure/pkg/cmd.Version={{.Version}}"
+   - "-s -w -X github.com/spinkube/spin-plugin-azure/pkg/cmd.Version={{ replace .Version "plugin/" "" }}"
   goos:
    - linux
    - darwin
@@ -24,8 +24,3 @@ archives:
   files:
     - LICENSE
 
-git:
-  tag_filter: 'plugin/*' # O
-
-release:
-  tag_name: '{{ replace .Tag "plugin/" "" }}'
