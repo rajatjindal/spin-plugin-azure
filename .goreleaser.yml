@@ -1,5 +1,7 @@
 version: 2
 
+version_template: '{{ .Tag | replace "plugin/" "" }}'
+
 builds:
 - id: spin-plugin-azure
   main: ./cmd/azure/main.go
@@ -7,7 +9,7 @@ builds:
   env:
    - CGO_ENABLED=0
   ldflags:
-   - '-s -w -X github.com/spinkube/spin-plugin-azure/pkg/cmd.Version={{ replace .Version "plugin/" "" }}'
+   - '-s -w -X github.com/spinkube/spin-plugin-azure/pkg/cmd.Version={{.Version}}'
   goos:
    - linux
    - darwin
