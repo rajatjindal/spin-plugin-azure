@@ -25,7 +25,7 @@ archives:
     - LICENSE
 
 git:
-  tag_filter: 'plugin/*' # Only consider tags starting with plugin/
+  tag_filter: 'plugin/*' # O
 
 release:
   tag_name: '{{ replace .Tag "plugin/" "" }}'
