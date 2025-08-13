@@ -1,6 +1,8 @@
 version: 2
 
-version_template: '{{ .Tag | replace "plugin/" "" }}'
+project:
+  name: myplugin
+  version_template: '{{ .Tag | replace "plugin/" "" }}'
 
 builds:
 - id: spin-plugin-azure
