@@ -23,3 +23,9 @@ archives:
   format: tar.gz
   files:
     - LICENSE
+
+git:
+  tag_filter: 'plugin/*' # Only consider tags starting with plugin/
+
+release:
+  tag_name: '{{ replace .Tag "plugin/" "" }}'
